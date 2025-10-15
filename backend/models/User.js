@@ -56,8 +56,76 @@ const userSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        enum: ['user', 'volunteer', 'admin'],
+        enum: ['user', 'volunteer', 'admin', 'moderator'],
         default: 'user'
+    },
+    isEmailVerified: {
+        type: Boolean,
+        default: false
+    },
+    emailVerificationToken: {
+        type: String
+    },
+    passwordResetToken: {
+        type: String
+    },
+    passwordResetExpires: {
+        type: Date
+    },
+    skills: [{
+        name: {
+            type: String,
+            required: true
+        },
+        level: {
+            type: String,
+            enum: ['beginner', 'intermediate', 'advanced', 'expert'],
+            default: 'beginner'
+        },
+        category: {
+            type: String,
+            required: true
+        }
+    }],
+    interests: [{
+        type: String,
+        trim: true
+    }],
+    location: {
+        country: String,
+        city: String,
+        coordinates: {
+            lat: Number,
+            lng: Number
+        }
+    },
+    socialLinks: {
+        linkedin: String,
+        twitter: String,
+        github: String,
+        website: String
+    },
+    preferences: {
+        notifications: {
+            email: { type: Boolean, default: true },
+            push: { type: Boolean, default: true },
+            sms: { type: Boolean, default: false }
+        },
+        privacy: {
+            profileVisibility: { type: String, enum: ['public', 'private', 'friends'], default: 'public' },
+            showEmail: { type: Boolean, default: false },
+            showPhone: { type: Boolean, default: false }
+        },
+        language: { type: String, default: 'en' },
+        timezone: { type: String, default: 'UTC' }
+    },
+    stats: {
+        totalVolunteerHours: { type: Number, default: 0 },
+        totalDonations: { type: Number, default: 0 },
+        projectsCompleted: { type: Number, default: 0 },
+        campaignsCreated: { type: Number, default: 0 },
+        rating: { type: Number, default: 0 },
+        reviewsCount: { type: Number, default: 0 }
     },
     tokens: [{
         token: {
@@ -198,6 +266,75 @@ userSchema.methods.toJSON = function() {
     return user;
 };
 
+// Generate email verification token
+userSchema.methods.generateEmailVerificationToken = function() {
+    const token = jwt.sign(
+        { _id: this._id.toString(), email: this.email },
+        process.env.JWT_SECRET,
+        { expiresIn: '24h' }
+    );
+    this.emailVerificationToken = token;
+    return token;
+};
+
+// Generate password reset token
+userSchema.methods.generatePasswordResetToken = function() {
+    const token = jwt.sign(
+        { _id: this._id.toString() },
+        process.env.JWT_SECRET,
+        { expiresIn: '1h' }
+    );
+    this.passwordResetToken = token;
+    this.passwordResetExpires = Date.now() + 3600000; // 1 hour
+    return token;
+};
+
+// Verify email
+userSchema.methods.verifyEmail = function() {
+    this.isEmailVerified = true;
+    this.emailVerificationToken = undefined;
+    return this.save();
+};
+
+// Reset password
+userSchema.methods.resetPassword = async function(newPassword) {
+    this.password = newPassword;
+    this.passwordResetToken = undefined;
+    this.passwordResetExpires = undefined;
+    return this.save();
+};
+
+// Add skill
+userSchema.methods.addSkill = function(skillData) {
+    const existingSkillIndex = this.skills.findIndex(skill =>
+        skill.name.toLowerCase() === skillData.name.toLowerCase()
+    );
+
+    if (existingSkillIndex >= 0) {
+        this.skills[existingSkillIndex] = skillData;
+    } else {
+        this.skills.push(skillData);
+    }
+    return this.save();
+};
+
+// Remove skill
+userSchema.methods.removeSkill = function(skillName) {
+    this.skills = this.skills.filter(skill =>
+        skill.name.toLowerCase() !== skillName.toLowerCase()
+    );
+    return this.save();
+};
+
+// Update stats
+userSchema.methods.updateStats = function(statType, value) {
+    if (this.stats[statType] !== undefined) {
+        this.stats[statType] += value;
+        return this.save();
+    }
+    throw new Error(`Invalid stat type: ${statType}`);
+};
+
 // Find user by credentials
 userSchema.statics.findByCredentials = async (email, password) => {
     const user = await User.findOne({ email });
@@ -209,6 +346,33 @@ userSchema.statics.findByCredentials = async (email, password) => {
         throw new Error('Unable to login');
     }
     return user;
+};
+
+// Find user by email verification token
+userSchema.statics.findByEmailVerificationToken = async (token) => {
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        return await User.findOne({
+            _id: decoded._id,
+            emailVerificationToken: token
+        });
+    } catch (error) {
+        throw new Error('Invalid or expired token');
+    }
+};
+
+// Find user by password reset token
+userSchema.statics.findByPasswordResetToken = async (token) => {
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        return await User.findOne({
+            _id: decoded._id,
+            passwordResetToken: token,
+            passwordResetExpires: { $gt: Date.now() }
+        });
+    } catch (error) {
+        throw new Error('Invalid or expired token');
+    }
 };
 
 const User = mongoose.model('User', userSchema);

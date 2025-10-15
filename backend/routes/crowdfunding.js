@@ -2,22 +2,47 @@ const express = require('express');
 const router = express.Router();
 const crowdfundingService = require('../services/crowdfundingService');
 const { upload } = require('../middleware/multer');
+const Campaign = require('../models/Campaign');
 
 // Create a new campaign
 router.post('/campaigns', upload.single('image'), async (req, res) => {
     try {
-        const { title, description, goal, duration } = req.body;
+        const { title, description, goal, duration, organization, category } = req.body;
         const imageUrl = req.file ? `/uploads/campaigns/${req.file.filename}` : null;
 
-        const result = await crowdfundingService.createCampaign(
-            title,
-            description,
-            goal,
-            duration,
-            imageUrl // Pass the image URL to the service
-        );
+        // Calculate deadline from duration
+        const deadline = new Date();
+        deadline.setDate(deadline.getDate() + parseInt(duration));
 
-        res.status(201).json(result);
+        // Create campaign in database
+        const campaign = new Campaign({
+            title,
+            organization: organization || 'Unknown Organization',
+            description,
+            goal: parseFloat(goal),
+            raised: 0,
+            deadline,
+            category: category || 'General',
+            image: imageUrl
+        });
+
+        const savedCampaign = await campaign.save();
+
+        // Try to create on blockchain as well (optional)
+        try {
+            const blockchainResult = await crowdfundingService.createCampaign(
+                title,
+                description,
+                goal,
+                duration,
+                imageUrl
+            );
+            console.log('Campaign also created on blockchain');
+        } catch (blockchainError) {
+            console.log('Campaign created in database only (blockchain unavailable):', blockchainError.message);
+        }
+
+        res.status(201).json(savedCampaign);
     } catch (error) {
         console.error('Error creating campaign:', error);
         res.status(500).json({
@@ -27,29 +52,42 @@ router.post('/campaigns', upload.single('image'), async (req, res) => {
     }
 });
 
-// Get all campaigns from the smart contract
+// Get all campaigns from the smart contract or database
 router.get('/campaigns', async (req, res) => {
     try {
-        console.log('Fetching campaign count...');
-        const count = await crowdfundingService.contract.campaignCount();
-        console.log('Campaign count:', count.toString());
+        console.log('Fetching campaigns...');
 
-        if (count.toString() === '0') {
-            return res.json([]);
-        }
+        // Try to get campaigns from blockchain first
+        try {
+            const count = await crowdfundingService.contract.campaignCount();
+            console.log('Campaign count from blockchain:', count.toString());
 
-        const campaigns = [];
-        for (let i = 1; i <= Number(count); i++) {
-            try {
-                console.log(`Fetching details for campaign ${i}...`);
-                const details = await crowdfundingService.getCampaignDetails(i);
-                campaigns.push({ id: i, ...details });
-            } catch (err) {
-                console.error(`Error fetching campaign ${i}:`, err);
-                // Continue with other campaigns even if one fails
+            if (count.toString() === '0') {
+                // If no campaigns on blockchain, try database
+                const dbCampaigns = await Campaign.find({}).sort({ createdAt: -1 });
+                return res.json(dbCampaigns);
             }
+
+            const campaigns = [];
+            for (let i = 1; i <= Number(count); i++) {
+                try {
+                    console.log(`Fetching details for campaign ${i}...`);
+                    const details = await crowdfundingService.getCampaignDetails(i);
+                    campaigns.push({ id: i, ...details });
+                } catch (err) {
+                    console.error(`Error fetching campaign ${i}:`, err);
+                    // Continue with other campaigns even if one fails
+                }
+            }
+
+            return res.json(campaigns);
+        } catch (blockchainError) {
+            console.log('Blockchain not available, falling back to database:', blockchainError.message);
+
+            // Fallback to database
+            const campaigns = await Campaign.find({}).sort({ createdAt: -1 });
+            return res.json(campaigns);
         }
-        res.json(campaigns);
     } catch (error) {
         console.error('Error in /campaigns route:', error);
         res.status(500).json({

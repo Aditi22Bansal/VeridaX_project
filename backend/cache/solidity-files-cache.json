@@ -1,78 +1,8 @@
 {
   "_format": "hh-sol-cache-2",
   "files": {
-    "D:\\pbl-veridax\\pbl-crowd-volun\\backend\\contracts\\Crowdfunding.sol": {
-      "lastModificationDate": 1745684691868,
-      "contentHash": "42ddd328cb1d0680d97aaf2362785fdb",
-      "sourceName": "contracts/Crowdfunding.sol",
-      "solcConfig": {
-        "version": "0.8.19",
-        "settings": {
-          "optimizer": {
-            "enabled": false,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.0"
-      ],
-      "artifacts": [
-        "Crowdfunding"
-      ]
-    },
-    "D:\\pbl-crowd-volun\\pbl-crowd-volun\\backend\\contracts\\Crowdfunding.sol": {
-      "lastModificationDate": 1746020323201,
-      "contentHash": "42ddd328cb1d0680d97aaf2362785fdb",
-      "sourceName": "contracts/Crowdfunding.sol",
-      "solcConfig": {
-        "version": "0.8.19",
-        "settings": {
-          "optimizer": {
-            "enabled": false,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.0"
-      ],
-      "artifacts": [
-        "Crowdfunding"
-      ]
-    },
-    "D:\\verida\\pbl-crowd-volun\\backend\\contracts\\Crowdfunding.sol": {
-      "lastModificationDate": 1746025653735,
+    "D:\\projects\\veridax\\pbl-crowd-volun\\backend\\contracts\\Crowdfunding.sol": {
+      "lastModificationDate": 1752330363065,
       "contentHash": "42ddd328cb1d0680d97aaf2362785fdb",
       "sourceName": "contracts/Crowdfunding.sol",
       "solcConfig": {

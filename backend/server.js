@@ -11,10 +11,13 @@ const http = require('http');
 const socketIo = require('socket.io');
 const authRoutes = require('./routes/authRoutes');
 const volunteerRoutes = require('./routes/volunteerRoutes');
+const volunteerOpportunityRoutes = require('./routes/volunteerOpportunityRoutes');
+const projectRoutes = require('./routes/projectRoutes');
 const crowdfundingRoutes = require('./routes/crowdfunding');
 const vverseRoutes = require('./routes/vverseRoutes');
 const userRoutes = require('./routes/userRoutes');
 const chatRoutes = require('./routes/chatRoutes');
+const marketplaceRoutes = require('./routes/marketplaceRoutes');
 const { uploadDir } = require('./middleware/upload');
 const { authenticateToken } = require('./middleware/auth');
 
@@ -64,10 +67,13 @@ app.get('/', (req, res) => {
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/volunteers', volunteerRoutes);
+app.use('/api/volunteer-opportunities', volunteerOpportunityRoutes);
+app.use('/api/projects', projectRoutes);
 app.use('/api/crowdfunding', crowdfundingRoutes);
 app.use('/api/vverse', vverseRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/chats', chatRoutes);
+app.use('/api/marketplace', marketplaceRoutes);
 
 // Socket.IO connection handling
 io.on('connection', (socket) => {

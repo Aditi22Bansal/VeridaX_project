@@ -348,4 +348,5 @@ export const resetPassword = async (token: string, newPassword: string) => {
   }
 };
 
+export { api };
 export default api;

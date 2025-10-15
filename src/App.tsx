@@ -15,6 +15,8 @@ import DonationForm from "./pages/crowdfunding/DonationForm";
 import DonationThankYou from "./pages/crowdfunding/ThankYou";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
+import EnhancedLogin from "./components/auth/EnhancedLogin";
+import EnhancedRegister from "./components/auth/EnhancedRegister";
 import ForgotPassword from "./pages/ForgotPassword";
 import TermsConditions from "./pages/TermsConditions";
 import AboutUs from "./pages/AboutUs";
@@ -22,6 +24,11 @@ import StartCampaign from "./pages/crowdfunding/StartCampaign";
 import AllCampaigns from "./pages/crowdfunding/AllCampaigns";
 import CampaignDetails from "./pages/crowdfunding/CampaignDetails";
 import VolunteerAllOpportunities from "./pages/volunteer/VolunteerAllOpportunities";
+import OpportunityListing from "./pages/volunteer/OpportunityListing";
+import OpportunityDetail from "./pages/volunteer/OpportunityDetail";
+import ProjectListing from "./pages/projects/ProjectListing";
+import ProductListing from "./pages/marketplace/ProductListing";
+import ProductDetail from "./pages/marketplace/ProductDetail";
 import Profile from "./pages/Profile";
 import VVerse from "./pages/VVerse";
 import Navbar from "@/components/navbar";
@@ -41,8 +48,10 @@ function App() {
               <Route path="/" element={<Index />} />
 
               {/* Auth Routes */}
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
+              <Route path="/login" element={<EnhancedLogin />} />
+              <Route path="/register" element={<EnhancedRegister />} />
+              <Route path="/login-old" element={<Login />} />
+              <Route path="/register-old" element={<Register />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
 
               {/* Information Routes */}
@@ -58,6 +67,15 @@ function App() {
               <Route path="/volunteer/opportunity/:id" element={<VolunteerOpportunity />} />
               <Route path="/volunteer/thank-you" element={<VolunteerThankYou />} />
               <Route path="/volunteer/all" element={<VolunteerAllOpportunities />} />
+              <Route path="/volunteer/opportunities" element={<OpportunityListing />} />
+              <Route path="/volunteer/opportunities/:id" element={<OpportunityDetail />} />
+
+              {/* Project Routes */}
+              <Route path="/projects" element={<ProjectListing />} />
+
+              {/* Marketplace Routes */}
+              <Route path="/marketplace" element={<ProductListing />} />
+              <Route path="/marketplace/products/:id" element={<ProductDetail />} />
 
               {/* Crowdfunding Routes */}
               <Route path="/crowdfunding" element={<CrowdfundingPage />} />
