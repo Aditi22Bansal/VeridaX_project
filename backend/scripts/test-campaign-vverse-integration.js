@@ -6,7 +6,7 @@ const User = require('../models/User');
 // Connect to database
 const connectDB = async () => {
   try {
-    await mongoose.connect('mongodb://localhost:27017/veridax');
+    await mongoose.connect('mongodb://localhost:27017/veridaP');
     console.log('MongoDB connected');
   } catch (error) {
     console.error('Database connection error:', error);

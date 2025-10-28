@@ -1,4 +1,11 @@
-require('dotenv').config();
+const path = require('path');
+const dotenvResult = require('dotenv').config({ path: path.join(__dirname, '.env') });
+if (dotenvResult.error) {
+  console.warn('⚠️  dotenv failed to load .env:', dotenvResult.error.message);
+} else if (dotenvResult.parsed) {
+  const loadedKeys = Object.keys(dotenvResult.parsed).filter(k => k !== 'JWT_SECRET');
+  console.log('✅ Loaded .env keys:', loadedKeys);
+}
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');

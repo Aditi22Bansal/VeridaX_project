@@ -6,7 +6,7 @@ const connectDB = async () => {
     if (!process.env.MONGODB_URI) {
       console.error('❌ MONGODB_URI is not defined in environment variables');
       console.log('📝 Please set MONGODB_URI in your .env file');
-      console.log('💡 Example: MONGODB_URI=mongodb://localhost:27017/veridax');
+      console.log('💡 Example: MONGODB_URI=mongodb://localhost:27017/veridaP');
       process.exit(1);
     }
 
@@ -21,7 +21,7 @@ const connectDB = async () => {
     console.log('2. Or use MongoDB Atlas (cloud database)');
     console.log('3. Check your MONGODB_URI in .env file');
     console.log('\n💡 For MongoDB Atlas:');
-    console.log('   MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/veridax');
+    console.log('   MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/veridaP');
     process.exit(1);
   }
 };
