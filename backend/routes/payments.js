@@ -6,7 +6,8 @@ const {
   confirmPayment,
   getPaymentHistory,
   getCampaignDonationStats,
-  processRefund
+  processRefund,
+  getCampaignDonors
 } = require('../controllers/paymentController');
 
 const router = express.Router();
@@ -40,6 +41,11 @@ router.get('/history', auth, getPaymentHistory);
 // @desc    Get campaign donation stats
 // @access  Public
 router.get('/campaign/:id/stats', getCampaignDonationStats);
+
+// @route   GET /api/payments/campaign/:id/donors
+// @desc    Get donors for a campaign (creator-only)
+// @access  Private
+router.get('/campaign/:id/donors', auth, getCampaignDonors);
 
 // @route   POST /api/payments/:id/refund
 // @desc    Process refund

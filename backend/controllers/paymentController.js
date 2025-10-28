@@ -3,6 +3,107 @@ const Campaign = require('../models/Campaign');
 const User = require('../models/User');
 const paymentService = require('../services/paymentService');
 
+// @desc    Get donors for a campaign (creator-only)
+// @route   GET /api/payments/campaign/:id/donors
+// @access  Private (Campaign Creator only)
+const getCampaignDonors = async (req, res) => {
+  try {
+    const campaignId = req.params.id;
+
+    // Validate campaign and ownership
+    const campaign = await Campaign.findById(campaignId).select('createdBy title donations').populate('donations.volunteerId', 'name email');
+    if (!campaign) {
+      return res.status(404).json({
+        success: false,
+        message: 'Campaign not found'
+      });
+    }
+
+    if (campaign.createdBy.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied. Only the campaign creator can view donors.'
+      });
+    }
+
+    // Fetch succeeded payments for the campaign
+    const payments = await Payment.find({
+      campaignId,
+      status: 'succeeded'
+    })
+      .populate('donorId', 'name email')
+      .select('amount donorName donorId isAnonymous message createdAt');
+
+    // Build unified donation items list
+    let donationItems;
+    if (payments && payments.length > 0) {
+      donationItems = payments.map((p) => ({
+        donorId: p.isAnonymous ? null : p.donorId?._id?.toString() || null,
+        donorName: p.isAnonymous ? 'Anonymous' : (p.donorId?.name || p.donorName || 'Donor'),
+        donorEmail: p.isAnonymous ? undefined : (p.donorId?.email || undefined),
+        isAnonymous: !!p.isAnonymous,
+        amount: p.amount,
+        message: p.message || '',
+        createdAt: p.createdAt
+      }));
+    } else {
+      const donationEntries = Array.isArray(campaign.donations) ? campaign.donations : [];
+      donationItems = donationEntries.map((d) => ({
+        donorId: d.volunteerId?._id?.toString() || null,
+        donorName: d.volunteerId?.name || 'Donor',
+        donorEmail: d.volunteerId?.email || undefined,
+        isAnonymous: false,
+        amount: d.amount,
+        message: '',
+        createdAt: d.donatedAt || campaign.createdAt
+      }));
+    }
+
+    // Aggregate by donor (id when present, else donorName for anonymous)
+    const donorMap = new Map();
+    for (const item of donationItems) {
+      const key = item.donorId ? `id:${item.donorId}` : `anon:${item.donorName}`;
+      if (!donorMap.has(key)) {
+        donorMap.set(key, {
+          key,
+          isAnonymous: item.isAnonymous,
+          donor: item.isAnonymous
+            ? { name: 'Anonymous' }
+            : { id: item.donorId, name: item.donorName, email: item.donorEmail },
+          totalAmount: 0,
+          donations: []
+        });
+      }
+      const entry = donorMap.get(key);
+      entry.totalAmount += item.amount;
+      entry.donations.push({ amount: item.amount, message: item.message, createdAt: item.createdAt });
+    }
+
+    // Final donors array
+    const donors = Array.from(donorMap.values()).sort((a, b) => b.totalAmount - a.totalAmount);
+
+    // Sort newest first
+    donors.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    res.status(200).json({
+      success: true,
+      data: {
+        campaign: {
+          id: campaignId,
+          title: campaign.title
+        },
+        donors
+      }
+    });
+  } catch (error) {
+    console.error('Get campaign donors error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+};
+
 // @desc    Create payment intent for donation
 // @route   POST /api/payments/create-intent
 // @access  Private
@@ -362,5 +463,6 @@ module.exports = {
   confirmPayment,
   getPaymentHistory,
   getCampaignDonationStats,
-  processRefund
+  processRefund,
+  getCampaignDonors
 };

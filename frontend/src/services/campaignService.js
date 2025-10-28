@@ -92,6 +92,16 @@ export const campaignService = {
     }
   },
 
+  // Get campaign donors (creator-only)
+  getCampaignDonors: async (campaignId) => {
+    try {
+      const response = await api.get(`/payments/campaign/${campaignId}/donors`);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  },
+
   // Get dashboard stats (calculated from campaigns)
   getDashboardStats: async () => {
     try {

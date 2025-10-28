@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { PlusIcon, EyeIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { UserGroupIcon } from '@heroicons/react/24/solid';
 import { campaignService } from '../../services/campaignService';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import toast from 'react-hot-toast';
@@ -9,6 +10,7 @@ import toast from 'react-hot-toast';
 const MyCampaigns = () => {
   const [campaigns, setCampaigns] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [donorsModal, setDonorsModal] = useState({ open: false, donors: [], title: '' });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -76,11 +78,26 @@ const MyCampaigns = () => {
     }
   };
 
+  const openDonors = async (campaign) => {
+    try {
+      const res = await campaignService.getCampaignDonors(campaign._id);
+      if (res.success) {
+        setDonorsModal({
+          open: true,
+          donors: res.data.donors || [],
+          title: campaign.title
+        });
+      }
+    } catch (e) {
+      toast.error(e.message || 'Failed to load donors');
+    }
+  };
+
   if (isLoading) {
     return <LoadingSpinner text="Loading your campaigns..." />;
   }
 
-  return (
+  return (<>
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <motion.div
@@ -177,6 +194,15 @@ const MyCampaigns = () => {
                     <PencilIcon className="w-4 h-4 mr-1 inline" />
                     Edit
                   </button>
+                  {campaign.type === 'crowdfunding' && (
+                    <button
+                      onClick={() => openDonors(campaign)}
+                      className="flex-1 btn-primary py-2 text-sm"
+                    >
+                      <UserGroupIcon className="w-4 h-4 mr-1 inline" />
+                      Donors
+                    </button>
+                  )}
                     <button
                       onClick={() => handleDeleteCampaign(campaign._id)}
                       className="px-3 py-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors duration-200"
@@ -190,7 +216,44 @@ const MyCampaigns = () => {
         </motion.div>
       </div>
     </div>
-  );
+
+    {donorsModal.open && (
+      <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+        <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold">Donors — {donorsModal.title}</h2>
+            <button onClick={() => setDonorsModal({ open: false, donors: [], title: '' })} className="text-gray-500 hover:text-gray-700">✕</button>
+          </div>
+          <div className="max-h-[60vh] overflow-y-auto divide-y">
+            {donorsModal.donors.length === 0 && (
+              <div className="py-10 text-center text-gray-500">No donations yet.</div>
+            )}
+            {donorsModal.donors.map((d, idx) => (
+              <details key={idx} className="group py-3">
+                <summary className="list-none cursor-pointer flex items-center justify-between">
+                  <div className="font-medium">{d.isAnonymous ? 'Anonymous' : d.donor?.name || 'Donor'}</div>
+                  <div className="font-semibold text-primary-700 underline">
+                    {formatCurrency(d.totalAmount)}
+                  </div>
+                </summary>
+                <div className="mt-2 space-y-2">
+                  {d.donations.map((dn, i) => (
+                    <div key={i} className="flex items-start justify-between text-sm text-gray-700">
+                      <div className="text-gray-500">{new Date(dn.createdAt).toLocaleString()}</div>
+                      <div className="font-medium">{formatCurrency(dn.amount)}</div>
+                    </div>
+                  ))}
+                </div>
+              </details>
+            ))}
+          </div>
+          <div className="mt-4 text-right">
+            <button onClick={() => setDonorsModal({ open: false, donors: [], title: '' })} className="btn-secondary px-4 py-2">Close</button>
+          </div>
+        </div>
+      </div>
+    )}
+  </>);
 };
 
 export default MyCampaigns;
