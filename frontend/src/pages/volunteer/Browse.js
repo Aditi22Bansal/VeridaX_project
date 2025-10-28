@@ -265,7 +265,7 @@ const VolunteerBrowse = () => {
 
                 <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
                   <div className="flex items-center">
-                    <span>{campaign.volunteers} volunteers</span>
+                    <span>{campaign.volunteers?.length || 0} volunteers</span>
                   </div>
                   <div className="flex items-center">
                     <span>{campaign.location}</span>

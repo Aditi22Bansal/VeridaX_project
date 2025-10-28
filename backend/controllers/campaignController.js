@@ -282,12 +282,25 @@ const getMyCampaigns = async (req, res) => {
       .populate('createdBy', 'name email')
       .sort({ createdAt: -1 });
 
+    // Compute volunteerCount as unique donors (volunteers array ∪ donations.volunteerId)
+    const campaignsWithCounts = campaigns.map((doc) => {
+      const obj = doc.toObject();
+      const uniqueIds = new Set();
+      (obj.volunteers || []).forEach((v) => uniqueIds.add(v?.toString()))
+      ;
+      (obj.donations || []).forEach((d) => {
+        if (d && d.volunteerId) uniqueIds.add(d.volunteerId.toString());
+      });
+      obj.volunteerCount = Array.from(uniqueIds).filter(Boolean).length;
+      return obj;
+    });
+
     console.log('Found campaigns:', campaigns.length);
 
     res.status(200).json({
       success: true,
       data: {
-        campaigns
+        campaigns: campaignsWithCounts
       }
     });
   } catch (error) {

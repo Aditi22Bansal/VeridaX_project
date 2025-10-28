@@ -126,7 +126,17 @@ campaignSchema.methods.addDonation = function(volunteerId, amount) {
   
   // Ensure raisedAmount is also a number to prevent string concatenation
   const currentRaisedAmount = parseFloat(this.raisedAmount) || 0;
-  
+
+  // Ensure donor is counted as a volunteer (unique)
+  const volunteerIdStr = volunteerId?.toString();
+  if (volunteerIdStr) {
+    const alreadyVolunteer = Array.isArray(this.volunteers) && this.volunteers.some(v => v?.toString() === volunteerIdStr);
+    if (!alreadyVolunteer) {
+      this.volunteers = Array.isArray(this.volunteers) ? this.volunteers : [];
+      this.volunteers.push(volunteerId);
+    }
+  }
+
   this.donations.push({ volunteerId, amount: numericAmount });
   this.raisedAmount = currentRaisedAmount + numericAmount;
   return this.save();

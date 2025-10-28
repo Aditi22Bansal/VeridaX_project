@@ -172,7 +172,7 @@ const MyCampaigns = () => {
 
                 <div className="flex justify-between items-center mb-4">
                   <span className="text-sm text-gray-500">
-                    {campaign.volunteers} volunteers
+                    {(campaign.volunteerCount ?? campaign.volunteers?.length ?? 0)} volunteers
                   </span>
                   <span className="text-sm text-gray-500 capitalize">
                     {campaign.category}

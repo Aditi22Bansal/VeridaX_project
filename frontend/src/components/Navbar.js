@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Bars3Icon,
@@ -25,6 +25,8 @@ const Navbar = () => {
   const { getCartTotals } = useCart();
   const { notifications } = useSocket();
   const navigate = useNavigate();
+  const location = useLocation();
+  const isLanding = location.pathname === '/';
 
   const handleLogout = async () => {
     await logout();
@@ -32,14 +34,23 @@ const Navbar = () => {
     setIsProfileOpen(false);
   };
 
-  const navItems = [
-    { name: 'Home', href: '/', icon: HomeIcon },
-    { name: 'Bazaar', href: '/bazaar', icon: null },
-    { name: 'VVerse', href: '/vverse', icon: null },
-    { name: 'About', href: '#about', icon: null },
-    { name: 'How It Works', href: '#how-it-works', icon: null },
-    { name: 'Contact', href: '#contact', icon: null },
-  ];
+  const navItems = (() => {
+    // On landing while logged out: show only Home + landing anchors
+    if (!isAuthenticated && isLanding) {
+      return [
+        { name: 'Home', href: '/', icon: HomeIcon },
+        { name: 'About', href: '#about', icon: null },
+        { name: 'How It Works', href: '#how-it-works', icon: null },
+        { name: 'Contact', href: '#contact', icon: null }
+      ];
+    }
+    // Otherwise show app sections
+    return [
+      { name: 'Home', href: '/', icon: HomeIcon },
+      { name: 'Bazaar', href: '/bazaar', icon: null },
+      { name: 'VVerse', href: '/vverse', icon: null }
+    ];
+  })();
 
   const adminNavItems = [
     { name: 'Dashboard', href: '/admin/dashboard', icon: ChartBarIcon },

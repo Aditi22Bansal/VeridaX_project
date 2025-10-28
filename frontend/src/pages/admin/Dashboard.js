@@ -310,7 +310,7 @@ const AdminDashboard = () => {
                   <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
                     <div className="flex items-center">
                       <UsersIcon className="w-4 h-4 mr-1" />
-                      <span>{campaign.volunteers} volunteers</span>
+                      <span>{campaign.volunteers?.length || 0} volunteers</span>
                     </div>
                     <div className="flex items-center">
                       <CalendarIcon className="w-4 h-4 mr-1" />
