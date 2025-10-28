@@ -1,10 +1,10 @@
-import api from './api';
+import api from "./api";
 
 export const campaignService = {
   // Get all campaigns
   getCampaigns: async (params = {}) => {
     try {
-      const response = await api.get('/campaigns', { params });
+      const response = await api.get("/campaigns", { params });
       return response.data;
     } catch (error) {
       throw error.response?.data || error;
@@ -24,7 +24,7 @@ export const campaignService = {
   // Create campaign (admin only)
   createCampaign: async (campaignData) => {
     try {
-      const response = await api.post('/campaigns', campaignData);
+      const response = await api.post("/campaigns", campaignData);
       return response.data;
     } catch (error) {
       throw error.response?.data || error;
@@ -54,10 +54,10 @@ export const campaignService = {
   // Get user's campaigns (admin only)
   getMyCampaigns: async () => {
     try {
-      const response = await api.get('/campaigns/my-campaigns');
+      const response = await api.get("/campaigns/my-campaigns");
       return response.data;
     } catch (error) {
-      console.error('getMyCampaigns error:', error.response?.data || error);
+      console.error("getMyCampaigns error:", error.response?.data || error);
       throw error.response?.data || error;
     }
   },
@@ -75,7 +75,9 @@ export const campaignService = {
   // Make donation
   makeDonation: async (campaignId, amount) => {
     try {
-      const response = await api.post(`/campaigns/${campaignId}/donate`, { amount });
+      const response = await api.post(`/campaigns/${campaignId}/donate`, {
+        amount,
+      });
       return response.data;
     } catch (error) {
       throw error.response?.data || error;
@@ -102,12 +104,29 @@ export const campaignService = {
     }
   },
 
+  // Update volunteer status (admin only)
+  updateVolunteerStatus: async (campaignId, volunteerId, status) => {
+    try {
+      const response = await api.put(
+        `/campaigns/${campaignId}/volunteers/${volunteerId}`,
+        {
+          status: status === "approve" ? "approved" : "rejected",
+        },
+      );
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  },
+
   // Get dashboard stats (calculated from campaigns)
   getDashboardStats: async () => {
     try {
       const [campaignsResponse, myCampaignsResponse] = await Promise.all([
-        api.get('/campaigns'),
-        api.get('/campaigns/my-campaigns').catch(() => ({ data: { data: { campaigns: [] } } }))
+        api.get("/campaigns"),
+        api
+          .get("/campaigns/my-campaigns")
+          .catch(() => ({ data: { data: { campaigns: [] } } })),
       ]);
 
       const allCampaigns = campaignsResponse.data.data.campaigns || [];
@@ -115,13 +134,21 @@ export const campaignService = {
 
       // Calculate stats
       const totalCampaigns = myCampaigns.length;
-      const activeCampaigns = myCampaigns.filter(c => c.status === 'active').length;
+      const activeCampaigns = myCampaigns.filter(
+        (c) => c.status === "active",
+      ).length;
 
       // Calculate total volunteers across all campaigns
-      const totalVolunteers = allCampaigns.reduce((sum, campaign) => sum + (campaign.volunteers?.length || 0), 0);
+      const totalVolunteers = allCampaigns.reduce(
+        (sum, campaign) => sum + (campaign.volunteers?.length || 0),
+        0,
+      );
 
       // Calculate total raised across all campaigns
-      const totalRaised = allCampaigns.reduce((sum, campaign) => sum + (campaign.raisedAmount || 0), 0);
+      const totalRaised = allCampaigns.reduce(
+        (sum, campaign) => sum + (campaign.raisedAmount || 0),
+        0,
+      );
 
       return {
         success: true,
@@ -129,11 +156,11 @@ export const campaignService = {
           totalCampaigns,
           totalVolunteers,
           totalRaised,
-          activeCampaigns
-        }
+          activeCampaigns,
+        },
       };
     } catch (error) {
       throw error.response?.data || error;
     }
-  }
+  },
 };

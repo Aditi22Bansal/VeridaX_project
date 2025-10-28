@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Bars3Icon,
   XMarkIcon,
@@ -12,25 +12,34 @@ import {
   UserGroupIcon,
   MagnifyingGlassIcon,
   ShoppingCartIcon,
-  BellIcon
-} from '@heroicons/react/24/outline';
-import { useAuth } from '../context/AuthContext';
-import { useCart } from '../context/CartContext';
-import { useSocket } from '../context/SocketContext';
+  BellIcon,
+} from "@heroicons/react/24/outline";
+import { useAuth } from "../context/AuthContext";
+import { useCart } from "../context/CartContext";
+import { useSocket } from "../context/SocketContext";
+import { useNotifications } from "../context/NotificationContext";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const { user, isAuthenticated, logout } = useAuth();
   const { getCartTotals } = useCart();
   const { notifications } = useSocket();
+  const {
+    unreadCount,
+    getRecentNotifications,
+    markAsRead,
+    formatTimeAgo,
+    getNotificationIcon,
+  } = useNotifications();
   const navigate = useNavigate();
   const location = useLocation();
-  const isLanding = location.pathname === '/';
+  const isLanding = location.pathname === "/";
 
   const handleLogout = async () => {
     await logout();
-    navigate('/');
+    navigate("/");
     setIsProfileOpen(false);
   };
 
@@ -38,35 +47,39 @@ const Navbar = () => {
     // On landing while logged out: show only Home + landing anchors
     if (!isAuthenticated && isLanding) {
       return [
-        { name: 'Home', href: '/', icon: HomeIcon },
-        { name: 'About', href: '#about', icon: null },
-        { name: 'How It Works', href: '#how-it-works', icon: null },
-        { name: 'Contact', href: '#contact', icon: null }
+        { name: "Home", href: "/", icon: HomeIcon },
+        { name: "About", href: "#about", icon: null },
+        { name: "How It Works", href: "#how-it-works", icon: null },
+        { name: "Contact", href: "#contact", icon: null },
       ];
     }
     // Otherwise show app sections
     return [
-      { name: 'Home', href: '/', icon: HomeIcon },
-      { name: 'Bazaar', href: '/bazaar', icon: null },
-      { name: 'VVerse', href: '/vverse', icon: null }
+      { name: "Home", href: "/", icon: HomeIcon },
+      { name: "Bazaar", href: "/bazaar", icon: null },
+      { name: "VVerse", href: "/vverse", icon: null },
     ];
   })();
 
   const adminNavItems = [
-    { name: 'Dashboard', href: '/admin/dashboard', icon: ChartBarIcon },
-    { name: 'Create Campaign', href: '/admin/create-campaign', icon: PlusIcon },
-    { name: 'My Campaigns', href: '/admin/my-campaigns', icon: UserGroupIcon },
+    { name: "Dashboard", href: "/admin/dashboard", icon: ChartBarIcon },
+    { name: "Create Campaign", href: "/admin/create-campaign", icon: PlusIcon },
+    { name: "My Campaigns", href: "/admin/my-campaigns", icon: UserGroupIcon },
   ];
 
   const volunteerNavItems = [
-    { name: 'Dashboard', href: '/volunteer/dashboard', icon: ChartBarIcon },
-    { name: 'Browse Campaigns', href: '/volunteer/browse', icon: MagnifyingGlassIcon },
-    { name: 'My Orders', href: '/volunteer/orders', icon: ShoppingCartIcon },
+    { name: "Dashboard", href: "/volunteer/dashboard", icon: ChartBarIcon },
+    {
+      name: "Browse Campaigns",
+      href: "/volunteer/browse",
+      icon: MagnifyingGlassIcon,
+    },
+    { name: "My Orders", href: "/volunteer/orders", icon: ShoppingCartIcon },
   ];
 
   const sellerNavItems = [
-    { name: 'Dashboard', href: '/bazaar/seller', icon: ChartBarIcon },
-    { name: 'My Shop', href: '/bazaar/shop', icon: UserGroupIcon },
+    { name: "Dashboard", href: "/bazaar/seller", icon: ChartBarIcon },
+    { name: "My Shop", href: "/bazaar/shop", icon: UserGroupIcon },
   ];
 
   return (
@@ -89,10 +102,11 @@ const Navbar = () => {
                 to={item.href}
                 className="text-gray-700 hover:text-primary-600 font-medium transition-colors duration-200"
                 onClick={(e) => {
-                  if (isLanding && item.href.startsWith('#')) {
+                  if (isLanding && item.href.startsWith("#")) {
                     e.preventDefault();
                     const el = document.querySelector(item.href);
-                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    if (el)
+                      el.scrollIntoView({ behavior: "smooth", block: "start" });
                   }
                 }}
               >
@@ -102,7 +116,7 @@ const Navbar = () => {
 
             {isAuthenticated && (
               <>
-                {user.role === 'admin' && (
+                {user.role === "admin" && (
                   <>
                     {adminNavItems.map((item) => (
                       <Link
@@ -117,7 +131,7 @@ const Navbar = () => {
                   </>
                 )}
 
-                {user.role === 'volunteer' && (
+                {user.role === "volunteer" && (
                   <>
                     {volunteerNavItems.map((item) => (
                       <Link
@@ -132,7 +146,7 @@ const Navbar = () => {
                   </>
                 )}
 
-                {user.role === 'seller' && (
+                {user.role === "seller" && (
                   <>
                     {sellerNavItems.map((item) => (
                       <Link
@@ -165,18 +179,110 @@ const Navbar = () => {
               )}
             </Link>
 
-            {/* VVerse Notifications */}
-            <Link
-              to="/vverse/notifications"
-              className="relative p-2 text-gray-700 hover:text-primary-600 transition-colors duration-200"
-            >
-              <BellIcon className="w-6 h-6" />
-              {notifications.length > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                  {notifications.length}
-                </span>
-              )}
-            </Link>
+            {/* Notifications */}
+            <div className="relative">
+              <button
+                onClick={() => setIsNotificationOpen(!isNotificationOpen)}
+                className="relative p-2 text-gray-700 hover:text-primary-600 transition-colors duration-200"
+              >
+                <BellIcon className="w-6 h-6" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                    {unreadCount}
+                  </span>
+                )}
+              </button>
+
+              <AnimatePresence>
+                {isNotificationOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50 max-h-96 overflow-y-auto"
+                  >
+                    <div className="px-4 py-2 border-b border-gray-100">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-sm font-semibold text-gray-900">
+                          Notifications
+                        </h3>
+                        {unreadCount > 0 && (
+                          <span className="text-xs text-gray-500">
+                            {unreadCount} unread
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {getRecentNotifications().length === 0 ? (
+                      <div className="px-4 py-8 text-center text-gray-500 text-sm">
+                        No notifications yet
+                      </div>
+                    ) : (
+                      getRecentNotifications().map((notification) => (
+                        <div
+                          key={notification._id}
+                          className={`px-4 py-3 hover:bg-gray-50 cursor-pointer border-l-4 ${
+                            notification.isRead
+                              ? "border-transparent"
+                              : "border-primary-500 bg-primary-50"
+                          }`}
+                          onClick={async () => {
+                            if (!notification.isRead) {
+                              await markAsRead(notification._id);
+                            }
+                            if (notification.actionUrl) {
+                              navigate(notification.actionUrl);
+                            }
+                            setIsNotificationOpen(false);
+                          }}
+                        >
+                          <div className="flex items-start space-x-3">
+                            <div className="text-lg">
+                              {getNotificationIcon(notification.type)}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p
+                                className={`text-sm font-medium ${
+                                  notification.isRead
+                                    ? "text-gray-700"
+                                    : "text-gray-900"
+                                }`}
+                              >
+                                {notification.title}
+                              </p>
+                              <p
+                                className={`text-sm ${
+                                  notification.isRead
+                                    ? "text-gray-500"
+                                    : "text-gray-600"
+                                } mt-1`}
+                              >
+                                {notification.message}
+                              </p>
+                              <p className="text-xs text-gray-400 mt-1">
+                                {formatTimeAgo(notification.createdAt)}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    )}
+
+                    <div className="px-4 py-2 border-t border-gray-100">
+                      <Link
+                        to="/notifications"
+                        className="text-xs text-primary-600 hover:text-primary-700 font-medium"
+                        onClick={() => setIsNotificationOpen(false)}
+                      >
+                        View all notifications
+                      </Link>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
 
             {isAuthenticated ? (
               <div className="relative">
@@ -199,7 +305,9 @@ const Navbar = () => {
                       className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50"
                     >
                       <div className="px-4 py-2 border-b border-gray-100">
-                        <p className="text-sm font-medium text-gray-900">{user?.name}</p>
+                        <p className="text-sm font-medium text-gray-900">
+                          {user?.name}
+                        </p>
                         <p className="text-xs text-gray-500">{user?.email}</p>
                         <span className="inline-block mt-1 px-2 py-1 text-xs font-medium bg-primary-100 text-primary-800 rounded-full">
                           {user?.role}
@@ -223,10 +331,7 @@ const Navbar = () => {
                 >
                   Sign In
                 </Link>
-                <Link
-                  to="/auth/signup"
-                  className="btn-primary"
-                >
+                <Link to="/auth/signup" className="btn-primary">
                   Get Started
                 </Link>
               </div>
@@ -253,7 +358,7 @@ const Navbar = () => {
           {isMenuOpen && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
+              animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.3 }}
               className="md:hidden border-t border-gray-200"
@@ -265,10 +370,14 @@ const Navbar = () => {
                     to={item.href}
                     className="block px-3 py-2 text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-md font-medium transition-colors duration-200"
                     onClick={(e) => {
-                      if (isLanding && item.href.startsWith('#')) {
+                      if (isLanding && item.href.startsWith("#")) {
                         e.preventDefault();
                         const el = document.querySelector(item.href);
-                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        if (el)
+                          el.scrollIntoView({
+                            behavior: "smooth",
+                            block: "start",
+                          });
                       }
                       setIsMenuOpen(false);
                     }}
@@ -280,7 +389,7 @@ const Navbar = () => {
                 {isAuthenticated && (
                   <>
                     <div className="border-t border-gray-200 my-2"></div>
-                    {user.role === 'admin' && (
+                    {user.role === "admin" && (
                       <>
                         {adminNavItems.map((item) => (
                           <Link
@@ -296,7 +405,7 @@ const Navbar = () => {
                       </>
                     )}
 
-                    {user.role === 'volunteer' && (
+                    {user.role === "volunteer" && (
                       <>
                         {volunteerNavItems.map((item) => (
                           <Link
@@ -312,7 +421,7 @@ const Navbar = () => {
                       </>
                     )}
 
-                    {user.role === 'seller' && (
+                    {user.role === "seller" && (
                       <>
                         {sellerNavItems.map((item) => (
                           <Link
@@ -330,7 +439,9 @@ const Navbar = () => {
 
                     <div className="border-t border-gray-200 my-2"></div>
                     <div className="px-3 py-2">
-                      <p className="text-sm font-medium text-gray-900">{user?.name}</p>
+                      <p className="text-sm font-medium text-gray-900">
+                        {user?.name}
+                      </p>
                       <p className="text-xs text-gray-500">{user?.email}</p>
                     </div>
                     <button

@@ -1,51 +1,60 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { Toaster } from 'react-hot-toast';
-import { HelmetProvider } from 'react-helmet-async';
+import React from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import { Toaster } from "react-hot-toast";
+import { HelmetProvider } from "react-helmet-async";
 
 // Context
-import { AuthProvider, useAuth } from './context/AuthContext';
-import { CartProvider } from './context/CartContext';
-import { SocketProvider } from './context/SocketContext';
+import { AuthProvider, useAuth } from "./context/AuthContext";
+import { CartProvider } from "./context/CartContext";
+import { SocketProvider } from "./context/SocketContext";
+import { NotificationProvider } from "./context/NotificationContext";
 
 // Components
-import Navbar from './components/Navbar';
-import Footer from './components/Footer';
-import LoadingSpinner from './components/LoadingSpinner';
+import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
+import LoadingSpinner from "./components/LoadingSpinner";
 
 // Pages
-import LandingPage from './pages/LandingPage';
-import LoginPage from './pages/auth/LoginPage';
-import SignupPage from './pages/auth/SignupPage';
-import AdminDashboard from './pages/admin/Dashboard';
-import AdminCreateCampaign from './pages/admin/CreateCampaign';
-import AdminEditCampaign from './pages/admin/EditCampaign';
-import AdminMyCampaigns from './pages/admin/MyCampaigns';
-import VolunteerDashboard from './pages/volunteer/Dashboard';
-import VolunteerBrowse from './pages/volunteer/Browse';
-import DeliveryTracking from './pages/volunteer/DeliveryTracking';
-import VolunteerOrders from './pages/volunteer/Orders';
-import VVerseDashboard from './pages/vverse/VVerseDashboard';
-import RoomInterface from './pages/vverse/RoomInterface';
-import CreateRoom from './pages/vverse/CreateRoom';
-import BrowseRooms from './pages/vverse/BrowseRooms';
-import Notifications from './pages/vverse/Notifications';
-import CampaignDetails from './pages/CampaignDetails';
-import NotFound from './pages/NotFound';
+import LandingPage from "./pages/LandingPage";
+import LoginPage from "./pages/auth/LoginPage";
+import SignupPage from "./pages/auth/SignupPage";
+import AdminDashboard from "./pages/admin/Dashboard";
+import AdminCreateCampaign from "./pages/admin/CreateCampaign";
+import AdminEditCampaign from "./pages/admin/EditCampaign";
+import AdminMyCampaigns from "./pages/admin/MyCampaigns";
+import VolunteerDashboard from "./pages/volunteer/Dashboard";
+import VolunteerBrowse from "./pages/volunteer/Browse";
+import DeliveryTracking from "./pages/volunteer/DeliveryTracking";
+import VolunteerOrders from "./pages/volunteer/Orders";
+import LogHours from "./pages/volunteer/LogHours";
+import Impact from "./pages/volunteer/Impact";
+import VVerseDashboard from "./pages/vverse/VVerseDashboard";
+import RoomInterface from "./pages/vverse/RoomInterface";
+import CreateRoom from "./pages/vverse/CreateRoom";
+import BrowseRooms from "./pages/vverse/BrowseRooms";
+import Notifications from "./pages/vverse/Notifications";
+import CampaignDetails from "./pages/CampaignDetails";
+import NotFound from "./pages/NotFound";
 
 // Bazaar Pages
-import BazaarHome from './pages/bazaar/BazaarHome';
-import ItemsBrowse from './pages/bazaar/ItemsBrowse';
-import ProductDetail from './pages/bazaar/ProductDetail';
-import Cart from './pages/bazaar/Cart';
-import Checkout from './pages/bazaar/Checkout';
-import SellerDashboard from './pages/bazaar/SellerDashboard';
-import MyShop from './pages/bazaar/MyShop';
-import AddProduct from './pages/bazaar/AddProduct';
-import ManageOrders from './pages/bazaar/ManageOrders';
-import OrderSuccess from './pages/bazaar/OrderSuccess';
-import SellerRegistration from './pages/bazaar/SellerRegistration';
-import SellerOnboarding from './pages/bazaar/SellerOnboarding';
+import BazaarHome from "./pages/bazaar/BazaarHome";
+import ItemsBrowse from "./pages/bazaar/ItemsBrowse";
+import ProductDetail from "./pages/bazaar/ProductDetail";
+import Cart from "./pages/bazaar/Cart";
+import Checkout from "./pages/bazaar/Checkout";
+import SellerDashboard from "./pages/bazaar/SellerDashboard";
+import MyShop from "./pages/bazaar/MyShop";
+import AddProduct from "./pages/bazaar/AddProduct";
+import ManageOrders from "./pages/bazaar/ManageOrders";
+import OrderSuccess from "./pages/bazaar/OrderSuccess";
+import SellerRegistration from "./pages/bazaar/SellerRegistration";
+import SellerOnboarding from "./pages/bazaar/SellerOnboarding";
+import NotificationsPage from "./pages/NotificationsPage";
 
 // Protected Route Component
 const ProtectedRoute = ({ children, requiredRole = null }) => {
@@ -76,9 +85,9 @@ const PublicRoute = ({ children }) => {
 
   if (isAuthenticated) {
     // Redirect based on user role
-    if (user.role === 'admin') {
+    if (user.role === "admin") {
       return <Navigate to="/admin/dashboard" replace />;
-    } else if (user.role === 'seller') {
+    } else if (user.role === "seller") {
       return <Navigate to="/bazaar/seller/onboarding" replace />;
     } else {
       return <Navigate to="/volunteer/dashboard" replace />;
@@ -126,6 +135,16 @@ const AppContent = () => {
 
             {/* Campaign Details (Public) */}
             <Route path="/campaign/:id" element={<CampaignDetails />} />
+
+            {/* Notifications (Protected) */}
+            <Route
+              path="/notifications"
+              element={
+                <ProtectedRoute>
+                  <NotificationsPage />
+                </ProtectedRoute>
+              }
+            />
 
             {/* Bazaar Routes (Public) */}
             <Route path="/bazaar" element={<BazaarHome />} />
@@ -196,6 +215,22 @@ const AppContent = () => {
               element={
                 <ProtectedRoute requiredRole="volunteer">
                   <VolunteerOrders />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/volunteer/log-hours"
+              element={
+                <ProtectedRoute requiredRole="volunteer">
+                  <LogHours />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/volunteer/impact"
+              element={
+                <ProtectedRoute requiredRole="volunteer">
+                  <Impact />
                 </ProtectedRoute>
               }
             />
@@ -329,24 +364,25 @@ const AppContent = () => {
           toastOptions={{
             duration: 4000,
             style: {
-              background: '#fff',
-              color: '#374151',
-              boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-              borderRadius: '0.75rem',
-              padding: '16px',
-              fontSize: '14px',
-              fontWeight: '500',
+              background: "#fff",
+              color: "#374151",
+              boxShadow:
+                "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+              borderRadius: "0.75rem",
+              padding: "16px",
+              fontSize: "14px",
+              fontWeight: "500",
             },
             success: {
               iconTheme: {
-                primary: '#10b981',
-                secondary: '#fff',
+                primary: "#10b981",
+                secondary: "#fff",
               },
             },
             error: {
               iconTheme: {
-                primary: '#ef4444',
-                secondary: '#fff',
+                primary: "#ef4444",
+                secondary: "#fff",
               },
             },
           }}
@@ -361,11 +397,13 @@ const App = () => {
   return (
     <HelmetProvider>
       <AuthProvider>
-        <CartProvider>
-          <SocketProvider>
-            <AppContent />
-          </SocketProvider>
-        </CartProvider>
+        <NotificationProvider>
+          <CartProvider>
+            <SocketProvider>
+              <AppContent />
+            </SocketProvider>
+          </CartProvider>
+        </NotificationProvider>
       </AuthProvider>
     </HelmetProvider>
   );
