@@ -109,7 +109,7 @@ const getCampaignDonors = async (req, res) => {
 // @access  Private
 const createPaymentIntent = async (req, res) => {
   try {
-    const { campaignId, amount, currency = 'usd', isAnonymous = false, message = '' } = req.body;
+    const { campaignId, amount, currency = 'inr', isAnonymous = false, message = '' } = req.body;
 
     // Validate input
     if (!campaignId || !amount || amount < 0.50) {

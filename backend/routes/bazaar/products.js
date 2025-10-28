@@ -58,7 +58,7 @@ router.get('/', async (req, res) => {
 
     // Get products with pagination
     const products = await Product.find(filter)
-      .populate('sellerId', 'name shopName')
+      .populate('sellerId', 'name shopName userId')
       .sort(sort)
       .skip(skip)
       .limit(parseInt(limit));

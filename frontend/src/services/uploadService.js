@@ -9,11 +9,19 @@ export const uploadService = {
 
       const response = await api.post('/upload/image', formData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+          'Content-Type': 'multipart/form-data'
+        }
       });
-
-      return response.data;
+      // Normalize backend response to a common shape
+      const data = response.data?.data || response.data || {};
+      return {
+        imageURL: data.url, // for legacy callers expecting imageURL
+        url: data.url,
+        filename: data.filename,
+        originalName: data.originalName,
+        size: data.size,
+        success: response.data?.success ?? true
+      };
     } catch (error) {
       throw error.response?.data || error;
     }

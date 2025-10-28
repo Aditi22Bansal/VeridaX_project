@@ -126,7 +126,8 @@ router.get('/my-products', auth, async (req, res) => {
       });
     }
 
-    const products = await Product.find({ sellerId: seller._id })
+  // Product.sellerId stores the User _id, not the Seller document _id
+  const products = await Product.find({ sellerId: seller.userId })
       .sort({ createdAt: -1 });
 
     res.json({

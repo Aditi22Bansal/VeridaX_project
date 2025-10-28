@@ -50,6 +50,8 @@ router.post('/image', upload.single('image'), (req, res) => {
     const baseUrl = process.env.BACKEND_URL || 'http://localhost:5000';
     const fileUrl = `${baseUrl}/uploads/${req.file.filename}`;
 
+    res.setHeader('Access-Control-Allow-Origin', process.env.FRONTEND_URL || 'http://localhost:3000');
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
     res.json({
       success: true,
       data: {

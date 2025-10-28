@@ -76,7 +76,8 @@ router.get('/seller', auth, async (req, res) => {
 
     const { page = 1, limit = 10, status } = req.query;
 
-    let filter = { sellerId: seller._id };
+    // Order.sellerId stores the seller's User _id, not the Seller document _id
+    let filter = { sellerId: seller.userId };
 
     if (status) {
       filter.status = status;
@@ -137,7 +138,7 @@ router.get('/:id', auth, async (req, res) => {
     // Check if user is the seller by looking up the seller profile
     const Seller = require('../../models/Seller');
     const seller = await Seller.findOne({ userId: req.user.id });
-    const isSeller = seller && order.sellerId._id.toString() === seller._id.toString();
+    const isSeller = seller && order.sellerId._id.toString() === seller.userId.toString();
 
     if (!isBuyer && !isSeller) {
       return res.status(403).json({
@@ -302,7 +303,8 @@ router.put('/:id/status', [
     // Check if user is the seller by looking up the seller profile
     const Seller = require('../../models/Seller');
     const seller = await Seller.findOne({ userId: req.user.id });
-    const isSeller = seller && order.sellerId.toString() === seller._id.toString();
+    // Order.sellerId stores the seller's User _id
+    const isSeller = seller && order.sellerId.toString() === seller.userId.toString();
 
     if (!isBuyer && !isSeller) {
       return res.status(403).json({

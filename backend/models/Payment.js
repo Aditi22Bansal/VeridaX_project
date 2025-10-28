@@ -18,8 +18,8 @@ const paymentSchema = new mongoose.Schema({
   },
   currency: {
     type: String,
-    default: 'usd',
-    enum: ['usd', 'eur', 'gbp', 'cad', 'aud']
+    default: 'inr',
+    enum: ['inr']
   },
   stripePaymentIntentId: {
     type: String,

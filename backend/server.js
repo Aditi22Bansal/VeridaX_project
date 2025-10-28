@@ -40,8 +40,10 @@ const io = socketIo(server, {
 // Connect to database
 connectDB();
 
-// Security middleware
-app.use(helmet());
+// Security middleware (allow cross-origin images for frontend to load /uploads)
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: 'cross-origin' }
+}));
 
 // Rate limiting
 const limiter = rateLimit({
@@ -67,8 +69,12 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// Serve uploaded files
-app.use('/uploads', express.static('uploads'));
+// Serve uploaded files with CORP header to allow cross-origin fetching from frontend
+app.use('/uploads', (req, res, next) => {
+  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+  res.setHeader('Access-Control-Allow-Origin', process.env.FRONTEND_URL || 'http://localhost:3000');
+  next();
+}, express.static('uploads'));
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

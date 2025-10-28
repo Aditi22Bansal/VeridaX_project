@@ -61,6 +61,7 @@ const Navbar = () => {
   const volunteerNavItems = [
     { name: 'Dashboard', href: '/volunteer/dashboard', icon: ChartBarIcon },
     { name: 'Browse Campaigns', href: '/volunteer/browse', icon: MagnifyingGlassIcon },
+    { name: 'My Orders', href: '/volunteer/orders', icon: ShoppingCartIcon },
   ];
 
   const sellerNavItems = [
@@ -87,6 +88,13 @@ const Navbar = () => {
                 key={item.name}
                 to={item.href}
                 className="text-gray-700 hover:text-primary-600 font-medium transition-colors duration-200"
+                onClick={(e) => {
+                  if (isLanding && item.href.startsWith('#')) {
+                    e.preventDefault();
+                    const el = document.querySelector(item.href);
+                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }
+                }}
               >
                 {item.name}
               </Link>
@@ -256,7 +264,14 @@ const Navbar = () => {
                     key={item.name}
                     to={item.href}
                     className="block px-3 py-2 text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-md font-medium transition-colors duration-200"
-                    onClick={() => setIsMenuOpen(false)}
+                    onClick={(e) => {
+                      if (isLanding && item.href.startsWith('#')) {
+                        e.preventDefault();
+                        const el = document.querySelector(item.href);
+                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      }
+                      setIsMenuOpen(false);
+                    }}
                   >
                     {item.name}
                   </Link>

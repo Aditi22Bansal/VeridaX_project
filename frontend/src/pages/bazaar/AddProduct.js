@@ -38,10 +38,8 @@ const AddProduct = () => {
         console.log('Uploading file:', file.name, file.size);
         const res = await uploadService.uploadImage(file);
         console.log('Upload response:', res);
-        if (res?.imageURL) {
-          uploaded.push(res.imageURL);
-        } else if (res?.url) {
-          uploaded.push(res.url);
+        if (res?.url || res?.imageURL) {
+          uploaded.push(res.url || res.imageURL);
         } else {
           console.error('Unexpected upload response format:', res);
         }

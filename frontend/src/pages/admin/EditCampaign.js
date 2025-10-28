@@ -336,7 +336,7 @@ const EditCampaign = () => {
             {campaignType === 'crowdfunding' && (
               <div>
                 <label htmlFor="goalAmount" className="block text-sm font-medium text-gray-700 mb-2">
-                  Goal Amount (USD)
+                  Goal Amount (INR)
                 </label>
                 <input
                   id="goalAmount"

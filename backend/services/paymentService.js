@@ -6,7 +6,7 @@ class PaymentService {
   }
 
   // Create payment intent for donation
-  async createPaymentIntent(amount, currency = 'usd', metadata = {}) {
+  async createPaymentIntent(amount, currency = 'inr', metadata = {}) {
     try {
       const paymentIntent = await this.stripe.paymentIntents.create({
         amount: Math.round(amount * 100), // Convert to cents

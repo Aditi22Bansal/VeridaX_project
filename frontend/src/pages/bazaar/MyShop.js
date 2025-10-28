@@ -40,8 +40,8 @@ const MyShop = () => {
         const sellerInfo = sellerData.data;
         setSeller(sellerInfo);
 
-        // Fetch seller's products
-        const productsResponse = await fetch(`/api/bazaar/products?sellerId=${sellerInfo._id}`, {
+        // Fetch seller's products (uses seller's userId on the backend)
+        const productsResponse = await fetch(`/api/bazaar/sellers/my-products`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
@@ -49,12 +49,12 @@ const MyShop = () => {
         const productsData = await productsResponse.json();
 
         if (productsData.success) {
-          const productsList = productsData.data.products || productsData.data || [];
+          const productsList = productsData.data || [];
           setProducts(productsList);
         }
 
         // Calculate shop stats
-        const productsList = productsData.data.products || productsData.data || [];
+        const productsList = (productsData && (productsData.data?.products || productsData.data)) || [];
         const shopStats = {
           totalProducts: productsList.length,
           averageRating: sellerInfo.averageRating || 0,

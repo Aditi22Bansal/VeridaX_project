@@ -19,7 +19,7 @@ router.post('/create-intent', [
   auth,
   body('campaignId', 'Campaign ID is required').notEmpty(),
   body('amount', 'Amount is required and must be at least $0.50').isFloat({ min: 0.50 }),
-  body('currency', 'Invalid currency').optional().isIn(['usd', 'eur', 'gbp', 'cad', 'aud']),
+  body('currency', 'Invalid currency').optional().isIn(['inr']),
   body('isAnonymous', 'isAnonymous must be boolean').optional().isBoolean(),
   body('message', 'Message cannot exceed 500 characters').optional().isLength({ max: 500 })
 ], createPaymentIntent);

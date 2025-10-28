@@ -24,6 +24,7 @@ import AdminMyCampaigns from './pages/admin/MyCampaigns';
 import VolunteerDashboard from './pages/volunteer/Dashboard';
 import VolunteerBrowse from './pages/volunteer/Browse';
 import DeliveryTracking from './pages/volunteer/DeliveryTracking';
+import VolunteerOrders from './pages/volunteer/Orders';
 import VVerseDashboard from './pages/vverse/VVerseDashboard';
 import RoomInterface from './pages/vverse/RoomInterface';
 import CreateRoom from './pages/vverse/CreateRoom';
@@ -187,6 +188,14 @@ const AppContent = () => {
               element={
                 <ProtectedRoute requiredRole="volunteer">
                   <DeliveryTracking />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/volunteer/orders"
+              element={
+                <ProtectedRoute requiredRole="volunteer">
+                  <VolunteerOrders />
                 </ProtectedRoute>
               }
             />
